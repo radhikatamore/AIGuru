@@ -20,14 +20,36 @@ st.subheader("Generate high-quality content from your prompts!")
 
 # User input
 user_prompt = st.text_area("Enter your prompt:", height=150)
+
+# Model selection
 model_choice = st.selectbox(
     "Choose AI model:",
     [
-        "gemini-2.5-flash",  # fast and cost-effective
-        "gemini-2.5-pro",    # higher quality, more capable
+        "gemini-2.5-flash",
+        "gemini-2.5-pro",
     ],
     index=0,
 )
+
+# Content depth selection
+depth_choice = st.selectbox(
+    "Select Content Depth (level of detail):",
+    [
+        "Shallow (high-level overview)",
+        "Medium (moderate detail with examples)",
+        "Deep (very detailed, nuanced, in-depth analysis)"
+    ],
+    index=1
+)
+
+# Map depth to system instructions
+depth_instruction_map = {
+    "Shallow (high-level overview)": "Provide a clear and simple overview. Focus on key points, avoid unnecessary details.",
+    "Medium (moderate detail with examples)": "Provide a moderately detailed explanation with examples and supporting points.",
+    "Deep (very detailed, nuanced, in-depth analysis)": "Provide an in-depth, thorough, and nuanced explanation. Include examples, multiple perspectives, reasoning, and insights."
+}
+
+depth_instruction = depth_instruction_map[depth_choice]
 
 # ------------------------------
 # Generate Content
@@ -38,27 +60,25 @@ if st.button("Generate Content"):
     else:
         with st.spinner("Generating content..."):
             try:
-                # Create model with improved system prompt
+                # Combine base system prompt with depth instruction
+                system_prompt = f"""
+                You are AiGuru, a professional AI content generator. 
+                Your task is to generate high-quality content based on the user's prompt.
+                {depth_instruction}
+                Use proper grammar and structure, adapt tone appropriately, include headings or examples if needed, and avoid filler or repetition.
+                """
+
                 model = genai.GenerativeModel(
                     model_name=model_choice,
-                    system_instruction="""
-                    You are AiGuru, a professional AI content generator. 
-                    Your task is to generate clear, engaging, and high-quality content based on the user's prompt. 
-                    - Keep the output concise but informative.
-                    - Use proper grammar and structure.
-                    - Adapt the tone based on the context (formal, friendly, or persuasive if needed).
-                    - Include examples, bullet points, or headings if relevant.
-                    - Avoid filler content and repetitions.
-                    - Always stay helpful, creative, and professional.
-                    """
+                    system_instruction=system_prompt
                 )
 
                 # Generate content
                 response = model.generate_content(
                     user_prompt,
                     generation_config={
-                        "max_output_tokens": 500,
-                        "temperature": 0.7,
+                        "max_output_tokens": 700,
+                        "temperature": 0.7
                     },
                 )
 
@@ -66,11 +86,8 @@ if st.button("Generate Content"):
                 # Robust Text Extraction
                 # ------------------------------
                 output_text = ""
-
-                # Option 1: direct 'text' attribute
                 if getattr(response, "text", None):
                     output_text = response.text
-                # Option 2: fallback to candidates
                 elif getattr(response, "candidates", None):
                     for candidate in response.candidates:
                         content = getattr(candidate, "content", None)
