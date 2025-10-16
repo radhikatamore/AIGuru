@@ -13,8 +13,8 @@ user_prompt = st.text_area("Enter your prompt:", height=150)
 model_choice = st.selectbox(
     "Choose AI model:",
     [
-        "gemini-1.5-flash",  # fast and cost-effective
-        "gemini-1.5-pro",    # higher quality, more capable
+        "gemini-2.5-flash",  # fast and cost-effective
+        "gemini-2.5-pro",    # higher quality, more capable
     ],
     index=0,
 )
