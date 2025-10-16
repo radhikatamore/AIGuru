@@ -73,12 +73,12 @@ if st.button("Generate Content"):
                     system_instruction=system_prompt
                 )
 
-                # Generate content
+                # Generate content with increased token limit
                 response = model.generate_content(
                     user_prompt,
                     generation_config={
-                        "max_output_tokens": 700,
-                        "temperature": 0.7
+                        "max_output_tokens": 20000,  
+                        "temperature": 0.35
                     },
                 )
 
@@ -86,14 +86,18 @@ if st.button("Generate Content"):
                 # Robust Text Extraction
                 # ------------------------------
                 output_text = ""
-                if getattr(response, "text", None):
-                    output_text = response.text
-                elif getattr(response, "candidates", None):
+
+                # Safe extraction: check candidates and parts
+                if hasattr(response, "candidates") and response.candidates:
                     for candidate in response.candidates:
                         content = getattr(candidate, "content", None)
                         if content and getattr(content, "parts", None):
                             for part in content.parts:
                                 output_text += getattr(part, "text", "")
+                
+                # Fallback to response.text only if valid
+                if not output_text and getattr(response, "text", None):
+                    output_text = response.text
 
                 # ------------------------------
                 # Display Results
