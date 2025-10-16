@@ -3,7 +3,7 @@ import streamlit as st
 import google.generativeai as genai
 
 # Configure Gemini API key: prefer env var, fallback to provided key for out-of-the-box use
-GEMINI_API_KEY = os.getenv("AIzaSyAgLDc18GEM0f0fCKjNpan69acXbHiZigQ") or "AIzaSyAgLDc18GEM0f0fCKjNpan69acXbHiZigQ"
+GEMINI_API_KEY=st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=GEMINI_API_KEY)
 
 st.title("AiGuru - AI Content Generator")
