@@ -14,7 +14,7 @@ genai.configure(api_key=GEMINI_API_KEY)
 # ------------------------------
 # Streamlit App UI
 # ------------------------------
-st.set_page_config(page_title="Write Wise - AI Content Generator", layout="wide")
+st.set_page_config(page_title="Write Wise- AI Content Generator", layout="wide")
 st.title("Write Wise - AI Content Generator")
 st.subheader("Generate high-quality content from your prompts!")
 
@@ -117,4 +117,4 @@ if st.button("Generate Content"):
 # ------------------------------
 st.markdown("---")
 st.caption("Powered by Google Gemini. Set GEMINI_API_KEY in Streamlit secrets to override.")
-st.markdown("Developed by AiGuru Team")
+st.markdown("Developed by Write Wise Team")
