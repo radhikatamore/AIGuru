@@ -1,6 +1,9 @@
 import streamlit as st
 import google.generativeai as genai
 from datetime import datetime
+import json
+import os
+from pathlib import Path
 
 # ------------------------------
 # Configure Gemini API Key
@@ -15,8 +18,30 @@ genai.configure(api_key=GEMINI_API_KEY)
 # ------------------------------
 # Initialize Session State for History
 # ------------------------------
+# Define history file path
+HISTORY_FILE = Path.home() / ".writewise_history.json"
+
+def load_history():
+    """Load history from JSON file"""
+    try:
+        if HISTORY_FILE.exists():
+            with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+    except Exception as e:
+        st.error(f"Error loading history: {e}")
+    return []
+
+def save_history(history):
+    """Save history to JSON file"""
+    try:
+        with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
+            json.dump(history, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        st.error(f"Error saving history: {e}")
+
+# Load history from file on startup
 if "history" not in st.session_state:
-    st.session_state.history = []
+    st.session_state.history = load_history()
 
 # Constants for history display
 PROMPT_PREVIEW_LENGTH = 100
@@ -39,6 +64,7 @@ with st.sidebar:
         # Clear history button
         if st.button("🗑️ Clear All History", use_container_width=True):
             st.session_state.history = []
+            save_history([])  # Save empty history to file
             st.rerun()
         
         st.markdown("---")
@@ -168,6 +194,7 @@ if st.button("Generate Content"):
                         "content": output_text
                     }
                     st.session_state.history.append(history_entry)
+                    save_history(st.session_state.history)  # Persist to file
                 else:
                     st.error("⚠️ No content returned by the model. Try a different prompt or model.")
 
