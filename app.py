@@ -1,5 +1,6 @@
 import streamlit as st
 import google.generativeai as genai
+from datetime import datetime
 
 # ------------------------------
 # Configure Gemini API Key
@@ -12,9 +13,54 @@ if not GEMINI_API_KEY:
 genai.configure(api_key=GEMINI_API_KEY)
 
 # ------------------------------
+# Initialize Session State for History
+# ------------------------------
+if "history" not in st.session_state:
+    st.session_state.history = []
+
+# ------------------------------
 # Streamlit App UI
 # ------------------------------
 st.set_page_config(page_title="Write Wise- AI Content Generator", layout="wide")
+
+# ------------------------------
+# Sidebar - History Feature
+# ------------------------------
+with st.sidebar:
+    st.header("📜 History")
+    
+    if st.session_state.history:
+        st.caption(f"Total entries: {len(st.session_state.history)}")
+        
+        # Clear history button
+        if st.button("🗑️ Clear All History", use_container_width=True):
+            st.session_state.history = []
+            st.rerun()
+        
+        st.markdown("---")
+        
+        # Display history items
+        for idx, item in enumerate(reversed(st.session_state.history)):
+            with st.expander(f"📝 {item['timestamp']} - {item['model']}", expanded=False):
+                st.markdown(f"**Prompt:** {item['prompt'][:100]}{'...' if len(item['prompt']) > 100 else ''}")
+                st.markdown(f"**Depth:** {item['depth']}")
+                st.markdown("**Generated Content:**")
+                st.markdown(item['content'][:300] + "..." if len(item['content']) > 300 else item['content'])
+                
+                # View full content button
+                if st.button(f"View Full Content", key=f"view_{idx}"):
+                    st.session_state[f"viewing_{idx}"] = True
+                
+                # Show full content if button was clicked
+                if st.session_state.get(f"viewing_{idx}", False):
+                    st.markdown("**Full Content:**")
+                    st.markdown(item['content'])
+                    if st.button(f"Hide", key=f"hide_{idx}"):
+                        st.session_state[f"viewing_{idx}"] = False
+                        st.rerun()
+    else:
+        st.info("No history yet. Generate content to see it here!")
+
 st.title("Write Wise - AI Content Generator")
 st.subheader("Generate high-quality content from your prompts!")
 
@@ -106,6 +152,16 @@ if st.button("Generate Content"):
                     st.success("✅ Content Generated Successfully!")
                     st.markdown("---")
                     st.markdown(output_text)
+                    
+                    # Save to history
+                    history_entry = {
+                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "prompt": user_prompt,
+                        "model": model_choice,
+                        "depth": depth_choice,
+                        "content": output_text
+                    }
+                    st.session_state.history.append(history_entry)
                 else:
                     st.error("⚠️ No content returned by the model. Try a different prompt or model.")
 
