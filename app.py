@@ -14,8 +14,8 @@ genai.configure(api_key=GEMINI_API_KEY)
 # ------------------------------
 # Streamlit App UI
 # ------------------------------
-st.set_page_config(page_title="AiGuru - AI Content Generator", layout="wide")
-st.title("AiGuru - AI Content Generator")
+st.set_page_config(page_title="Write Wise - AI Content Generator", layout="wide")
+st.title("Write Wise - AI Content Generator")
 st.subheader("Generate high-quality content from your prompts!")
 
 # User input
