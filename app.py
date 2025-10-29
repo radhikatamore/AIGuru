@@ -18,6 +18,10 @@ genai.configure(api_key=GEMINI_API_KEY)
 if "history" not in st.session_state:
     st.session_state.history = []
 
+# Constants for history display
+PROMPT_PREVIEW_LENGTH = 100
+CONTENT_PREVIEW_LENGTH = 300
+
 # ------------------------------
 # Streamlit App UI
 # ------------------------------
@@ -41,22 +45,24 @@ with st.sidebar:
         
         # Display history items
         for idx, item in enumerate(reversed(st.session_state.history)):
+            # Use timestamp as unique key component
+            entry_key = f"{item['timestamp']}_{idx}"
             with st.expander(f"📝 {item['timestamp']} - {item['model']}", expanded=False):
-                st.markdown(f"**Prompt:** {item['prompt'][:100]}{'...' if len(item['prompt']) > 100 else ''}")
+                st.markdown(f"**Prompt:** {item['prompt'][:PROMPT_PREVIEW_LENGTH]}{'...' if len(item['prompt']) > PROMPT_PREVIEW_LENGTH else ''}")
                 st.markdown(f"**Depth:** {item['depth']}")
                 st.markdown("**Generated Content:**")
-                st.markdown(item['content'][:300] + "..." if len(item['content']) > 300 else item['content'])
+                st.markdown(item['content'][:CONTENT_PREVIEW_LENGTH] + "..." if len(item['content']) > CONTENT_PREVIEW_LENGTH else item['content'])
                 
                 # View full content button
-                if st.button(f"View Full Content", key=f"view_{idx}"):
-                    st.session_state[f"viewing_{idx}"] = True
+                if st.button(f"View Full Content", key=f"view_{entry_key}"):
+                    st.session_state[f"viewing_{entry_key}"] = True
                 
                 # Show full content if button was clicked
-                if st.session_state.get(f"viewing_{idx}", False):
+                if st.session_state.get(f"viewing_{entry_key}", False):
                     st.markdown("**Full Content:**")
                     st.markdown(item['content'])
-                    if st.button(f"Hide", key=f"hide_{idx}"):
-                        st.session_state[f"viewing_{idx}"] = False
+                    if st.button(f"Hide", key=f"hide_{entry_key}"):
+                        st.session_state[f"viewing_{entry_key}"] = False
                         st.rerun()
     else:
         st.info("No history yet. Generate content to see it here!")
